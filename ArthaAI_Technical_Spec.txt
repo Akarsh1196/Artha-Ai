@@ -1,0 +1,1143 @@
+ArthaAI
+AI-Powered Personal Finance Platform for India
+Complete Product & Technical Specification
+v1.0  |  Full-Stack + ML/AI  |  Resume-Grade Project
+Stack Layer
+Technology
+Frontend
+React.js 18 + TypeScript + Tailwind CSS v3
+Backend
+Spring Boot 3.x (Java 21) + REST API
+Database
+PostgreSQL 15 (Neon DB)
+AI / Chat
+Google Gemini 1.5 Flash API
+ML Microservice
+Python 3.11 + FastAPI + Scikit-learn
+Auth
+JWT + OAuth2 (Google Login) + Spring Security
+Deployment
+Vercel (FE) + Railway (BE) + Render (ML)
+
+
+1. Product Vision & Goals
+ArthaAI is a resume-grade, fully deployable AI-powered personal finance platform built specifically for Indian users. It combines robust financial logic, real Indian tax laws, Gemini-powered conversational AI, and machine learning predictions — packaged in a professional fintech-grade UI.
+
+Target User
+	•	Indian salaried professionals aged 22–45
+	•	Users tracking monthly expenses, SIPs, loans, and tax-saving goals
+	•	People who want AI guidance without a human financial advisor
+
+What Makes It Resume-Worthy
+	•	Full-stack architecture spanning 3 separate services (React, Spring Boot, FastAPI)
+	•	Real Indian financial context — 80C, 80D, NPS, SIP compounding, EPF
+	•	Gemini LLM integration with structured prompt engineering and context injection
+	•	OAuth2 Google login + JWT dual-token auth (access + refresh tokens)
+	•	ML microservice for spending anomaly detection and savings forecasting
+	•	Live deployed product with a public URL — not just a localhost demo
+
+
+2. Full Technology Stack — Every Dependency
+2.1 Frontend
+Package
+Version
+Purpose
+react
+18.3.x
+Core UI framework
+react-dom
+18.3.x
+DOM rendering
+typescript
+5.x
+Type safety across entire frontend
+vite
+5.x
+Build tool + dev server (faster than CRA)
+react-router-dom
+6.x
+Client-side routing with protected routes
+tailwindcss
+3.x
+Utility-first CSS framework
+@headlessui/react
+2.x
+Accessible modal, dropdown, toggle primitives
+@heroicons/react
+2.x
+Icon set (matches Tailwind)
+recharts
+2.x
+Composable charts — bar, pie, line, area
+react-hook-form
+7.x
+Form state management + validation
+zod
+3.x
+Schema validation — used with react-hook-form
+@hookform/resolvers
+3.x
+Bridge between zod and react-hook-form
+axios
+1.x
+HTTP client with interceptors for JWT refresh
+@tanstack/react-query
+5.x
+Server state, caching, background re-fetching
+zustand
+4.x
+Lightweight global state (auth, theme, user)
+react-hot-toast
+2.x
+Non-blocking toast notifications
+date-fns
+3.x
+Date formatting and manipulation
+framer-motion
+11.x
+Smooth page transitions and card animations
+@google/generative-ai
+0.x
+Gemini SDK (streaming chat responses)
+clsx
+2.x
+Conditional className utility
+tailwind-merge
+2.x
+Merge Tailwind classes without conflicts
+
+2.2 Backend — Spring Boot
+Dependency (Maven)
+Purpose
+spring-boot-starter-web
+REST controller layer, embedded Tomcat
+spring-boot-starter-data-jpa
+Hibernate ORM, JPA repositories
+spring-boot-starter-security
+Security filter chain, BCrypt, method security
+spring-boot-starter-validation
+Bean Validation — @Valid, @NotBlank, @Size
+spring-boot-starter-mail
+JavaMailSender for email verification OTPs
+spring-boot-starter-cache
+Caffeine in-memory cache for AI responses
+spring-boot-starter-actuator
+Health endpoints, metrics for Railway deployment
+postgresql
+JDBC driver for PostgreSQL
+jjwt-api + jjwt-impl + jjwt-jackson
+JWT creation, signing, parsing (io.jsonwebtoken)
+spring-security-oauth2-client
+Google OAuth2 login flow
+springdoc-openapi-starter-webmvc
+Auto-generates Swagger UI at /swagger-ui.html
+mapstruct
+DTO ↔ Entity mapping (compile-time, no reflection)
+lombok
+Eliminates boilerplate (@Data, @Builder, @Slf4j)
+flyway-core
+Database migrations — versioned SQL scripts
+bucket4j-core
+Token bucket rate limiting for AI endpoints
+webflux (WebClient)
+Async HTTP calls to Python ML microservice
+jackson-databind
+JSON serialization / deserialization
+testcontainers-postgresql
+Integration tests with real PostgreSQL container
+spring-boot-starter-test
+JUnit 5 + Mockito + MockMvc
+
+2.3 Python ML Microservice
+Package
+Version
+Purpose
+fastapi
+0.111.x
+Async REST framework
+uvicorn[standard]
+0.30.x
+ASGI server with hot-reload
+pydantic
+2.x
+Request / response validation
+pandas
+2.x
+Expense data wrangling
+scikit-learn
+1.5.x
+IsolationForest (anomaly), LinearRegression (forecast)
+numpy
+1.26.x
+Numerical computations
+python-dotenv
+1.x
+Environment variable loading
+httpx
+0.27.x
+Async HTTP client for health checks
+pytest + httpx
+latest
+API endpoint tests
+gunicorn
+latest
+Production WSGI wrapper for Render deployment
+
+2.4 Database — PostgreSQL 15
+	•	Host: Neon DB (serverless PostgreSQL, free tier, connection pooling built-in)
+	•	Migrations: Flyway — all schema changes tracked in src/main/resources/db/migration/
+	•	Connection pool: HikariCP (Spring Boot default) — max pool size 10
+	•	Extensions: uuid-ossp (UUID generation), pg_stat_statements (query insights)
+
+2.5 AI Layer — Gemini
+Detail
+Value
+Model
+gemini-1.5-flash (fast, cost-efficient, 1M token context)
+SDK
+@google/generative-ai (Node/JS) on frontend for streaming
+Fallback
+gemini-1.5-pro for complex tax/investment analysis
+Context injection
+User's full financial profile sent with every chat message
+Streaming
+SSE stream piped from Gemini → Spring Boot → React EventSource
+Rate limiting
+Bucket4j: 20 AI requests / user / hour
+History storage
+Last 20 conversation turns stored in chatbot_history table
+
+2.6 Deployment Stack
+Service
+Platform
+Plan
+Config
+React Frontend
+Vercel
+Hobby (free)
+vite build → auto-deploy on git push
+Spring Boot Backend
+Railway
+Starter $5/mo
+Dockerfile or Nixpack, env vars in dashboard
+Python ML Service
+Render
+Free tier
+Dockerfile, spins down after inactivity
+PostgreSQL
+Neon DB
+Free tier
+Serverless, 0.5 GB storage, connection pooling
+Media / Files
+Cloudinary
+Free tier
+Bank statement PDF uploads, OCR preprocessing
+
+
+3. System Architecture
+3.1 High-Level Data Flow
+The system is split into three independently deployable services connected via REST APIs:
+
+Layer
+Responsibility
+Communicates With
+React (Vercel)
+UI rendering, state management, Gemini streaming chat
+Spring Boot via Axios/React Query
+Spring Boot (Railway)
+Business logic, auth, scoring engine, DB access
+PostgreSQL, Python ML service, Gemini API (server-side)
+Python FastAPI (Render)
+ML model inference: anomaly detection, forecasting
+Called by Spring Boot via WebClient
+PostgreSQL (Neon)
+Single source of truth for all user data
+Spring Boot via JDBC / Hibernate
+Gemini API
+LLM for chatbot and AI-generated advice text
+Spring Boot (server-side proxy) or React (direct stream)
+
+3.2 Authentication Flow
+	•	User lands on /login — two options: email+password OR Continue with Google
+	•	Email/password: POST /api/auth/signup → Spring Security hashes password with BCrypt (strength 12) → stores in users table → returns access token (15 min) + refresh token (7 days, HttpOnly cookie)
+	•	Google OAuth2: Spring Security OAuth2 Client → Google consent screen → callback /login/oauth2/code/google → Spring creates/updates user in DB → same JWT pair issued
+	•	Every protected API request: Axios interceptor reads access token from memory → sends as Authorization: Bearer header → Spring JwtAuthFilter validates → injects UserPrincipal into SecurityContext
+	•	Token refresh: Axios response interceptor detects 401 → calls POST /api/auth/refresh with HttpOnly cookie → Spring returns new access token → original request retried
+
+3.3 Gemini Chat Proxy Architecture
+Two modes depending on context size:
+	•	Short chats (< 500 tokens context): React calls Gemini SDK directly with streaming — instantaneous UI feel
+	•	Full advisory queries: React calls POST /api/ai/chat → Spring Boot builds enriched prompt with full user profile → calls Gemini API server-side → streams SSE back to React
+	•	Server-side proxy hides Gemini API key, enforces rate limits, logs usage, saves history
+
+
+4. Database Schema — Full Table Definitions
+users
+Column
+Type
+Constraints
+Notes
+id
+UUID
+PK, DEFAULT gen_random_uuid()
+
+full_name
+VARCHAR(120)
+NOT NULL
+
+email
+VARCHAR(255)
+NOT NULL, UNIQUE
+
+password_hash
+VARCHAR(255)
+NULLABLE
+NULL for OAuth-only users
+oauth_provider
+VARCHAR(50)
+NULLABLE
+google / null
+oauth_id
+VARCHAR(255)
+NULLABLE
+Google sub ID
+age
+INT
+CHECK (age > 0)
+
+occupation
+VARCHAR(100)
+
+
+annual_income
+DECIMAL(15,2)
+DEFAULT 0
+INR
+risk_appetite
+VARCHAR(20)
+DEFAULT conservative
+conservative/moderate/aggressive
+is_verified
+BOOLEAN
+DEFAULT false
+Email verification flag
+created_at
+TIMESTAMPTZ
+DEFAULT now()
+
+updated_at
+TIMESTAMPTZ
+DEFAULT now()
+
+
+expenses
+Column
+Type
+Constraints
+Notes
+id
+UUID
+PK
+
+user_id
+UUID
+FK → users(id)
+CASCADE DELETE
+amount
+DECIMAL(12,2)
+NOT NULL
+INR
+category
+VARCHAR(50)
+NOT NULL
+food/travel/bills/emi/shopping/healthcare/entertainment/other
+sub_category
+VARCHAR(100)
+
+e.g. Swiggy, Netflix
+date
+DATE
+NOT NULL
+
+payment_mode
+VARCHAR(40)
+
+upi/card/cash/netbanking
+notes
+TEXT
+
+
+is_recurring
+BOOLEAN
+DEFAULT false
+Marks SIPs, EMIs, subscriptions
+created_at
+TIMESTAMPTZ
+DEFAULT now()
+
+
+investments
+Column
+Type
+Notes
+id
+UUID
+PK
+user_id
+UUID
+FK → users
+type
+VARCHAR(50)
+sip/stocks/ppf/fd/gold/nps/elss/sgb
+name
+VARCHAR(200)
+e.g. Mirae Asset Large Cap Fund
+amount
+DECIMAL(12,2)
+Monthly SIP or lump sum INR
+current_value
+DECIMAL(12,2)
+Updated manually or via API
+start_date
+DATE
+
+maturity_date
+DATE
+NULLABLE
+expected_return
+DECIMAL(5,2)
+Annual % — user-provided estimate
+created_at
+TIMESTAMPTZ
+DEFAULT now()
+
+liabilities
+Column
+Type
+Notes
+id
+UUID
+PK
+user_id
+UUID
+FK → users
+type
+VARCHAR(50)
+home_loan/car_loan/education_loan/personal_loan/credit_card
+lender
+VARCHAR(200)
+e.g. SBI, HDFC
+principal
+DECIMAL(12,2)
+Original loan amount INR
+outstanding
+DECIMAL(12,2)
+Current remaining balance
+emi
+DECIMAL(10,2)
+Monthly EMI INR
+interest_rate
+DECIMAL(5,2)
+Annual % (e.g. 8.5)
+tenure_months
+INT
+Total loan tenure in months
+start_date
+DATE
+
+
+goals
+Column
+Type
+Notes
+id
+UUID
+PK
+user_id
+UUID
+FK → users
+name
+VARCHAR(200)
+e.g. Buy a car, Children education
+target_amount
+DECIMAL(14,2)
+INR
+current_savings
+DECIMAL(14,2)
+Amount already saved toward this goal
+monthly_contrib
+DECIMAL(10,2)
+Planned monthly investment toward goal
+expected_return
+DECIMAL(5,2)
+Expected annual return %
+target_date
+DATE
+NULLABLE — date-based planning
+status
+VARCHAR(20)
+active/achieved/paused
+created_at
+TIMESTAMPTZ
+DEFAULT now()
+
+chatbot_history
+Column
+Type
+Notes
+id
+UUID
+PK
+user_id
+UUID
+FK → users
+role
+VARCHAR(20)
+user / assistant
+content
+TEXT
+Message content
+tokens_used
+INT
+Gemini token count for usage tracking
+created_at
+TIMESTAMPTZ
+DEFAULT now()
+
+financial_scores
+Column
+Type
+Notes
+id
+UUID
+PK
+user_id
+UUID
+FK → users, UNIQUE (one active score per user)
+overall_score
+INT
+0-100
+savings_ratio_score
+INT
+0-100 sub-score
+debt_ratio_score
+INT
+0-100 sub-score
+emergency_fund_score
+INT
+0-100 sub-score
+investment_score
+INT
+0-100 sub-score
+insurance_score
+INT
+0-100 sub-score
+ai_commentary
+TEXT
+Gemini-generated 2-3 sentence plain-English explanation
+calculated_at
+TIMESTAMPTZ
+DEFAULT now()
+
+
+5. Complete API Reference
+5.1 Auth APIs
+Method
+Endpoint
+Auth
+Description
+POST
+/api/auth/signup
+Public
+Register with email + password. Sends verification email.
+POST
+/api/auth/login
+Public
+Email+password login. Returns access token + sets refresh cookie.
+POST
+/api/auth/refresh
+Cookie
+Exchange refresh token for new access token.
+POST
+/api/auth/logout
+JWT
+Invalidates refresh token, clears cookie.
+GET
+/api/auth/verify-email?token=
+Public
+Verify email via token sent in signup email.
+POST
+/api/auth/forgot-password
+Public
+Sends OTP to registered email.
+POST
+/api/auth/reset-password
+Public
+Resets password using OTP.
+GET
+/login/oauth2/code/google
+OAuth2
+Google OAuth callback — handled by Spring Security.
+
+5.2 User Profile APIs
+Method
+Endpoint
+Description
+GET
+/api/users/me
+Get current user profile
+PUT
+/api/users/me
+Update income, age, risk appetite, occupation
+PUT
+/api/users/me/income
+Update income sources (salary, freelance, passive)
+DELETE
+/api/users/me
+Soft-delete account (GDPR compliance)
+
+5.3 Expense APIs
+Method
+Endpoint
+Description
+GET
+/api/expenses
+Get expenses — filterable by month, year, category
+GET
+/api/expenses/summary
+Monthly totals, category breakdown, MoM change %
+GET
+/api/expenses/trends
+6-month expense trend data for line chart
+POST
+/api/expenses
+Add single expense
+PUT
+/api/expenses/{id}
+Update expense
+DELETE
+/api/expenses/{id}
+Delete expense
+POST
+/api/expenses/bulk
+Add multiple expenses (used after OCR parsing)
+
+5.4 Financial Score APIs
+Method
+Endpoint
+Description
+GET
+/api/financial-score
+Get latest score for current user
+POST
+/api/financial-score/calculate
+Recalculate score with current data
+GET
+/api/financial-score/history
+Score history over last 12 months for trend chart
+
+5.5 Investment APIs
+Method
+Endpoint
+Description
+GET
+/api/investments
+List all investments for user
+POST
+/api/investments
+Add investment
+PUT
+/api/investments/{id}
+Update investment value or details
+DELETE
+/api/investments/{id}
+Remove investment
+GET
+/api/investments/recommendation
+Get AI-generated allocation based on risk profile
+GET
+/api/investments/summary
+Portfolio total, equity/debt split, XIRR estimate
+
+5.6 AI & Chat APIs
+Method
+Endpoint
+Description
+POST
+/api/ai/chat
+Send message — returns SSE stream of Gemini response
+GET
+/api/ai/chat/history
+Last 20 turns for current user
+DELETE
+/api/ai/chat/history
+Clear chat history
+GET
+/api/ai/advice/daily
+Single daily AI tip generated from user profile
+POST
+/api/ai/analyze-statement
+Trigger OCR + AI categorization for uploaded PDF
+
+5.7 Tax Advisor APIs
+Method
+Endpoint
+Description
+GET
+/api/tax/summary
+Current year tax liability (old + new regime comparison)
+GET
+/api/tax/suggestions
+List of actionable 80C, 80D, NPS savings recommendations
+POST
+/api/tax/simulate
+What-if: how much tax saved if I invest X more in ELSS?
+
+5.8 Goals & SIP APIs
+Method
+Endpoint
+Description
+GET
+/api/goals
+List all goals with progress %
+POST
+/api/goals
+Create goal
+PUT
+/api/goals/{id}
+Update goal
+DELETE
+/api/goals/{id}
+Delete goal
+POST
+/api/goals/{id}/simulate
+Recalculate timeline with updated SIP amount
+POST
+/api/sip/calculate
+SIP maturity calculator — returns full projection data
+
+5.9 ML Microservice APIs (Python FastAPI)
+Method
+Endpoint
+Description
+POST
+/ml/anomaly-detect
+Receives last 90 days of expense data — returns flagged outliers
+POST
+/ml/savings-forecast
+Predicts next 6-month savings using LinearRegression on past data
+GET
+/ml/health
+Health check endpoint — Spring Boot pings this on startup
+
+
+6. Financial Health Score Engine
+The scoring engine is the core differentiator of ArthaAI. It runs server-side in Spring Boot and produces a 0–100 score with sub-scores and an AI-generated commentary.
+
+6.1 Scoring Parameters & Weights
+Parameter
+Weight
+Formula
+Scoring Logic
+Savings Ratio
+30%
+Monthly Savings / Monthly Income
+≥40%=100, 25–40%=75, 10–25%=50, <10%=20
+Debt-to-Income (DTI)
+25%
+Total Monthly EMIs / Monthly Income
+≤15%=100, 15–30%=75, 30–50%=50, >50%=20
+Emergency Fund
+20%
+Liquid savings ÷ Monthly expenses
+≥6 months=100, 3–6=70, 1–3=40, <1=10
+Investment Consistency
+15%
+Active SIPs or monthly investments
+Regular SIPs=100, occasional=60, none=0
+Insurance Coverage
+10%
+Has health insurance declared
+Yes=100, No=0
+
+6.2 Final Score Calculation
+Final Score = (SavingsScore × 0.30) + (DTIScore × 0.25) + (EmergencyScore × 0.20) + (InvestmentScore × 0.15) + (InsuranceScore × 0.10)
+
+Score Range
+Status
+Color Tag
+Action
+80–100
+Excellent
+Green
+Celebrate — suggest advanced investing
+60–79
+Good
+Blue
+Minor improvements possible
+40–59
+Average
+Yellow
+Actionable gaps — AI highlights top 2 fixes
+0–39
+Poor
+Red
+Urgent — AI generates priority action plan
+
+6.3 Gemini Commentary Prompt
+After scoring, Spring Boot sends this prompt to Gemini 1.5 Flash:
+
+You are a concise Indian financial advisor. User score: {score}/100. Sub-scores: savings={s}, debt={d}, emergency={e}, investment={i}. Write exactly 2 sentences: first, acknowledge their biggest strength. Second, name ONE specific improvement action in plain Hindi-friendly English. No markdown, no lists.
+
+
+7. Python ML Microservice
+7.1 Anomaly Detection — IsolationForest
+	•	Input: Last 90 days of expense records as JSON array from Spring Boot
+	•	Features used: amount, day_of_week, category_encoded, is_weekend
+	•	Model: sklearn.ensemble.IsolationForest with contamination=0.05 (expects ~5% anomalies)
+	•	Output: List of expense IDs flagged as anomalous with anomaly_score
+	•	Spring Boot receives this and stores flags in expenses.is_anomaly column, triggers in-app notification
+
+7.2 Savings Forecast — Linear Regression
+	•	Input: Last 6–12 months of (month_index, monthly_savings) pairs
+	•	Model: sklearn.linear_model.LinearRegression — simple and explainable
+	•	Output: Next 6 months of predicted savings as array, plus confidence_low and confidence_high (±1 std)
+	•	Displayed in dashboard as a projected savings line chart with shaded confidence band
+
+7.3 FastAPI Service Structure
+ml-service/
+  main.py              # FastAPI app init
+  routers/
+    anomaly.py         # /ml/anomaly-detect
+    forecast.py        # /ml/savings-forecast
+  models/
+    isolation_forest.py
+    linear_forecast.py
+  schemas.py           # Pydantic request/response models
+  Dockerfile
+  requirements.txt
+
+
+8. UI/UX Design System
+8.1 Color Tokens (Tailwind Config)
+Token
+Dark Mode Value
+Light Mode Value
+Usage
+primary
+#4F46E5 (Indigo-600)
+#4338CA (Indigo-700)
+CTAs, active nav, score gauge
+surface
+#111827 (Gray-900)
+#FFFFFF
+Card backgrounds
+surface-2
+#1F2937 (Gray-800)
+#F9FAFB (Gray-50)
+Sidebar, secondary cards
+border
+#374151 (Gray-700)
+#E5E7EB (Gray-200)
+Card borders, dividers
+text-primary
+#F9FAFB
+#111827
+Headings, key numbers
+text-muted
+#9CA3AF
+#6B7280
+Labels, captions
+success
+#10B981 (Emerald-500)
+#059669
+Positive deltas, Good score
+danger
+#EF4444 (Red-500)
+#DC2626
+Alerts, Poor score, anomalies
+warning
+#F59E0B (Amber-500)
+#D97706
+Average score, warnings
+
+8.2 Page List & Routes
+Route
+Page
+Key Components
+/login
+Auth
+Email form, Google OAuth button, animated ArthaAI logo
+/signup
+Auth
+Multi-step form: account → financial profile → risk quiz
+/dashboard
+Dashboard
+Score gauge, balance cards, expense trend, AI tip widget
+/expenses
+Expense Tracker
+Add expense form, filterable table, pie + bar charts
+/investments
+Investments
+Portfolio cards, allocation pie, recommendation cards
+/goals
+Goal Planner
+Goal cards with progress bars, timeline projections
+/sip-calculator
+SIP Calculator
+Interactive slider inputs, wealth growth chart
+/tax
+Tax Advisor
+80C progress bars, regime comparison table, savings tip cards
+/ai-chat
+AI Chatbot
+Chat UI with streaming text, suggested prompts, history
+/settings
+Settings
+Profile edit, theme toggle, notification prefs, danger zone
+/admin
+Admin Panel
+Protected — user table, AI usage stats, anomaly flags
+
+8.3 Dashboard Layout
+	•	Top row — 4 stat cards: Net Worth, Monthly Savings, Total Debt, Investment Value
+	•	Row 2 left — Financial Health Score gauge (animated Recharts RadialBarChart, 0–100)
+	•	Row 2 right — Expense category pie chart (current month)
+	•	Row 3 left — Expense trend line (6 months) with savings overlay
+	•	Row 3 right — AI Daily Tip card with Gemini-generated insight (refreshes daily)
+	•	Row 4 — Investment portfolio bar chart + Goal progress cards
+
+
+9. Full Project Folder Structure
+9.1 Frontend (React + Vite)
+arthaai-frontend/
+  src/
+    components/
+      ui/              # Button, Input, Card, Badge, Modal, Skeleton
+      charts/          # ScoreGauge, ExpensePie, TrendLine, SIPChart
+      layout/          # Sidebar, Navbar, ThemeToggle, PageWrapper
+      forms/           # ExpenseForm, GoalForm, ProfileForm
+    pages/
+      Dashboard.tsx
+      Expenses.tsx
+      Investments.tsx
+      Goals.tsx
+      SIPCalculator.tsx
+      TaxAdvisor.tsx
+      AIChat.tsx
+      Settings.tsx
+      admin/
+        AdminDashboard.tsx
+    services/
+      api.ts           # Axios instance with interceptors
+      auth.service.ts
+      expense.service.ts
+      investment.service.ts
+      ai.service.ts    # Gemini streaming helper
+    store/
+      authStore.ts     # Zustand — user, token, login/logout
+      themeStore.ts    # Zustand — dark/light mode
+    hooks/
+      useFinancialScore.ts
+      useExpenses.ts
+      useGeminiStream.ts
+    utils/
+      formatCurrency.ts    # ₹ formatting with Indian numbering
+      financialCalc.ts     # SIP, DTI, savings ratio formulas (client-side)
+      taxCalc.ts           # 80C, 80D, NPS calculations
+    types/
+      user.types.ts
+      expense.types.ts
+      investment.types.ts
+    App.tsx
+    main.tsx
+  index.html
+  tailwind.config.ts
+  vite.config.ts
+  .env.example
+
+9.2 Backend (Spring Boot)
+arthaai-backend/
+  src/main/java/com/arthaai/
+    controller/
+      AuthController.java
+      UserController.java
+      ExpenseController.java
+      InvestmentController.java
+      GoalController.java
+      AIController.java          # SSE streaming endpoint
+      TaxController.java
+      FinancialScoreController.java
+      AdminController.java
+    service/
+      AuthService.java
+      ExpenseService.java
+      FinancialScoreService.java  # Core scoring engine
+      GeminiService.java          # Prompt building + API calls
+      MLClientService.java        # WebClient calls to Python ML
+      TaxService.java             # Indian tax computation logic
+      OCRService.java             # PDFBox + Tesseract integration
+    repository/
+      UserRepository.java
+      ExpenseRepository.java
+      InvestmentRepository.java
+      GoalRepository.java
+      ChatHistoryRepository.java
+      FinancialScoreRepository.java
+    entity/
+      User.java
+      Expense.java
+      Investment.java
+      Liability.java
+      Goal.java
+      ChatMessage.java
+      FinancialScore.java
+    dto/
+      request/    # SignupRequest, LoginRequest, ExpenseRequest ...
+      response/   # UserResponse, ScoreResponse, AIResponse ...
+    security/
+      JwtAuthFilter.java
+      JwtTokenProvider.java
+      OAuth2SuccessHandler.java
+      SecurityConfig.java
+    config/
+      CorsConfig.java
+      CacheConfig.java       # Caffeine cache beans
+      WebClientConfig.java   # ML service WebClient
+    exception/
+      GlobalExceptionHandler.java
+      ResourceNotFoundException.java
+  src/main/resources/
+    db/migration/
+      V1__create_users.sql
+      V2__create_expenses.sql
+      V3__create_investments.sql
+      ...
+    application.yml
+    application-prod.yml
+  Dockerfile
+  pom.xml
+
+
+10. Development Phases & Milestones
+Phase
+What to Build
+Deliverable
+Phase 1
+(Foundation)
+Project setup: Vite+TS, Spring Boot, PostgreSQL on Neon, Flyway migrations, CORS. Auth module: signup/login/JWT/Google OAuth. User profile. Basic layout with sidebar + dark/light toggle.
+Working auth flow deployed. Google login functional.
+Phase 2
+(Core Finance)
+Expense CRUD + category charts. Financial Health Score engine — all 5 sub-scores. Dashboard with stat cards + score gauge. Recharts integration.
+Dashboard live showing real score from real data.
+Phase 3
+(AI Layer)
+Gemini chat integration (server-side proxy + SSE streaming). Prompt engineering with financial context injection. Chat history persistence. Daily AI tip on dashboard.
+Working AI chatbot that knows the user's finances.
+Phase 4
+(Advanced Finance)
+Investment module + recommendations. Tax Advisor (80C, 80D, NPS, regime comparison). Goal Planner with timeline projection. SIP Calculator.
+All 4 modules functional with charts.
+Phase 5
+(ML Layer)
+Python FastAPI microservice. IsolationForest anomaly detection. Savings LinearRegression forecast. Spring Boot WebClient integration. Anomaly alerts in notifications.
+ML service deployed on Render, called by Spring Boot.
+Phase 6
+(Polish & Deploy)
+OCR bank statement upload (Cloudinary + PDFBox). Framer Motion animations. Mobile-responsive layout. Full deployment: Vercel + Railway + Render. Swagger docs.
+Live public URL. GitHub README with screenshots.
+
+
+11. Security Implementation
+Concern
+Implementation
+Password storage
+BCrypt with cost factor 12 — never stored in plaintext
+JWT access token
+15-minute expiry, signed with HS512, stored in memory (not localStorage)
+JWT refresh token
+7-day expiry, stored as HttpOnly + Secure + SameSite=Strict cookie
+Google OAuth
+Spring Security OAuth2 Client handles PKCE flow — no secret exposed to browser
+CORS
+Allowlist only Vercel frontend domain in production
+Rate limiting
+Bucket4j: 20 AI requests/user/hour, 100 API requests/user/minute
+SQL injection
+All DB access via Hibernate JPA — zero raw JDBC queries
+Input validation
+@Valid on all request DTOs — validated at controller layer
+API key security
+Gemini API key in Railway env vars only — never in frontend bundle
+HTTPS
+Enforced by Vercel (FE) and Railway (BE) — HTTP redirected to HTTPS
+Secrets management
+.env files gitignored — .env.example committed as template
+
+
+12. Resume & GitHub Documentation
+12.1 Resume Bullet Points
+Use these verbatim on your resume under Projects:
+
+	•	Built ArthaAI, a full-stack AI-powered personal finance platform for Indian users using React 18 (TypeScript), Spring Boot 3 (Java 21), and PostgreSQL
+	•	Engineered a weighted Financial Health Score engine with 5 parameters (savings ratio, DTI, emergency fund, investment consistency, insurance) and Gemini-powered natural language commentary
+	•	Integrated Google Gemini 1.5 Flash via SSE streaming for a real-time conversational finance advisor with context-aware prompt injection of user financial profiles
+	•	Built a Python FastAPI ML microservice using IsolationForest for spending anomaly detection and LinearRegression for 6-month savings forecasting, deployed on Render
+	•	Implemented OAuth2 Google login + JWT dual-token authentication (access + HttpOnly refresh cookie) using Spring Security with BCrypt and rate limiting via Bucket4j
+	•	Designed Indian tax optimization module covering Section 80C, 80D, NPS with old vs new tax regime comparison, calculating potential tax savings up to ₹78,000/year
+	•	Deployed across 3 platforms (Vercel, Railway, Render) with Neon DB (serverless PostgreSQL), Flyway migrations, and Swagger API documentation
+
+12.2 GitHub README Sections
+	•	Hero banner — product name + one-line description + live demo link + tech badges
+	•	Screenshots — dashboard, AI chat, tax advisor, score gauge (use a GIF for chat streaming)
+	•	Feature list — 10 bullet points matching resume bullets above
+	•	Architecture diagram — simple boxes: React → Spring Boot → PostgreSQL / Gemini / Python ML
+	•	Tech stack table — split by Frontend / Backend / ML / Database / Deployment
+	•	Local setup guide — prerequisites, .env.example explanation, docker-compose up for PostgreSQL
+	•	API documentation — link to Swagger UI at /swagger-ui.html
+	•	Future scope — real mutual fund NAV APIs, UPI transaction sync, voice AI assistant
+
+
+13. Environment Variables Reference
+Frontend (.env)
+Variable
+Value / Description
+VITE_API_BASE_URL
+https://your-app.railway.app — Spring Boot backend URL
+VITE_GEMINI_API_KEY
+Only needed if using direct Gemini SDK from frontend (streaming)
+VITE_GOOGLE_CLIENT_ID
+Google OAuth client ID (needed for frontend OAuth hint UI only)
+
+Backend (Railway env vars)
+Variable
+Value / Description
+DATABASE_URL
+postgresql://user:pass@host/db — Neon DB connection string
+JWT_SECRET
+256-bit random string for HS512 signing
+JWT_ACCESS_EXPIRY_MS
+900000 (15 minutes)
+JWT_REFRESH_EXPIRY_MS
+604800000 (7 days)
+GEMINI_API_KEY
+Google AI Studio API key
+GOOGLE_CLIENT_ID
+OAuth2 client ID
+GOOGLE_CLIENT_SECRET
+OAuth2 client secret
+ML_SERVICE_URL
+https://your-ml-service.onrender.com
+MAIL_USERNAME
+Gmail address for sending verification emails
+MAIL_PASSWORD
+Gmail app password (not main password)
+CLOUDINARY_URL
+cloudinary://api_key:api_secret@cloud_name
+FRONTEND_URL
+https://arthaai.vercel.app — used in CORS allowlist
+
+
+End of ArthaAI Technical Specification
+Build it phase by phase. Ship phase 1 first. The goal is a live deployed URL.
